@@ -1,9 +1,8 @@
-# MixR Deployment Setup
+# MACI API Deployment Setup
 
 Steps to deploy the project:
 
-- Update these variables in the `~/.bashrc` file: TAG=(staging/prod), SERVER_URL, and CR_PAT=(github personal access token)
-- Login with docker using `echo $CR_PAT | docker login ghcr.io -u MixR-gg --password-stdin` command
+- Update these variables in the `~/.bashrc` file: TAG=latest, SERVER_URL=${domain name}
 - Create the Diffie-Hellman key for ssl using `mkdir dhparam && sudo openssl dhparam -out ./dhparam/dhparam-2048.pem 2048`
 - Create the env files for the web app and the stripe sync engine, `touch .web-app.env`
 - Update the env variables in the .env file
