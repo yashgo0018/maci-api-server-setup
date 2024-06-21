@@ -1,0 +1,68 @@
+version: "3.1"
+
+services:
+  web-app:
+    image: "ghcr.io/yashgo0018/maci-api:${TAG}"
+    container_name: webapp
+    networks:
+      - app-network
+    env_file:
+      - ./.web-app.env
+    volumes:
+      - jwt-key:/jwt-key
+    restart: unless-stopped
+  nginx-server:
+    image: nginx:mainline-alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - web-root:/var/www/html
+      - ${NGINX_TEMPLATE_DIR}:/etc/nginx/templates
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - dhparam:/etc/ssl/certs
+    depends_on:
+      - web-app
+    networks:
+      - app-network
+    environment:
+      - NGINX_HOST=${SERVER_URL}
+  certbot:
+    image: certbot/certbot
+    container_name: sslbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
+    depends_on:
+      - nginx-server
+    command: certonly --webroot --webroot-path=/var/www/html --email yash@mixr.gg --agree-tos --no-eff-email --${CERTBOT_COMMAND_FLAG} -d ${SERVER_URL} -d www.${SERVER_URL}
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  certbot-etc:
+  certbot-var:
+  jwt-key:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./jwt-key
+      o: bind
+  web-root:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./web-root
+      o: bind
+  dhparam:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./dhparam
+      o: bind
