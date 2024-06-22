@@ -8,8 +8,16 @@ services:
       - app-network
     env_file:
       - ./.web-app.env
-    volumes:
-      - jwt-key:/jwt-key
+    restart: unless-stopped
+  telegram-bot:
+    image: "ghcr.io/yashgo0018/maci-telegram-bot-rs:${TAG}"
+    container_name: telegram-bot
+    networks:
+      - app-network
+    env_file:
+      - ./.telegram-bot.env
+    depends_on:
+      - web-app
     restart: unless-stopped
   nginx-server:
     image: nginx:mainline-alpine
